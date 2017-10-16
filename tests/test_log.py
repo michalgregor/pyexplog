@@ -77,14 +77,10 @@ class TestConf2Where:
             ExpLog.conf2where(['test'])
             
 class TestConf2Idx:
-    def testNone()
+    def testNone(self, class_explog):
+        assert class_explog.conf2idx("EvoExperiment", None) is None
     
     def testInt(self, class_explog):
         assert class_explog.conf2idx("EvoExperiment", 5) == 5
 
-    def 
     
-#    def testInt2(self, class_explog):
-#        print(class_explog)  
-#        
-#        assert 4 == 4

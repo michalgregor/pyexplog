@@ -5,12 +5,6 @@ import numpy as np
 import collections
 from joblib import Parallel, delayed, cpu_count
 
-class DummyExperiment:
-    def __call__(self, config):
-        print("Running DummyExperiment with configuration {}.".format(config))
-        return {'result_key': pd.DataFrame(np.random.uniform(-5, 10, [3, 2]),
-                                           columns=["r1", "r2"])}
-
 class ExpManager:
     def __init__(self, explog, update_mode='skip'):
         """
@@ -57,21 +51,25 @@ class ExpManager:
             else:
                 self.explog.add_results(logGroup, replace_run, res)
                 
-def repeated_experiment(experiment, configuration, num_repeats, n_jobs=cpu_count()):
+def repeated_experiment(experiment, configuration, num_repeats, n_jobs=cpu_count(), irun_key='_irun_'):
     resCol = Parallel(n_jobs=n_jobs)(delayed(experiment)(configuration) for i in range(num_repeats))
     res = {}
 
     for ir, rd in enumerate(resCol):
         if not isinstance(rd, dict):
-            print("The results of the experiment must come as a dictionary.")
+            raise TypeError("The results of the experiment must come as a dictionary.")
         
         for rk, r in rd.items():
-            r["_irun_"] = ir
+            print(rk)
+
+            r[irun_key] = ir
 
             try:
-                res[rk].append(r)
+                frame = res[rk]
             except KeyError:
                 res[rk] = r
-    
+            else:
+                res[rk] = frame.append(r)
+
     return res
     
